@@ -1,9 +1,11 @@
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
-import { cacheLife } from 'next/cache';
 import BookEvent from '@/components/BookEvent';
 import EventCard from '@/components/EventCard';
 import { getSimilarEventsBySlug, getBookingsCountBySlug } from '@/lib/actions/event.actions';
+
+// Force dynamic rendering for this page (fetches fresh data on each request)
+export const dynamic = 'force-dynamic';
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
 
@@ -67,9 +69,6 @@ const EventTags = ({ tags }: { tags: string[] }) => (
  * Displays full event information with booking form
  */
 export default async function EventDetailsPage({ params }: PageProps) {
-  'use cache';
-  cacheLife('hours');
-
   const { slug } = await params;
 
   let event: EventData | null = null;

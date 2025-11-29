@@ -1,8 +1,10 @@
-import { cacheLife } from 'next/cache';
 import ExploreBtn from '@/components/ExploreBtn';
 import EventCard from '@/components/EventCard';
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
+
+// Force dynamic rendering (fetches fresh data on each request)
+export const dynamic = 'force-dynamic';
 
 interface EventData {
   title: string;
@@ -15,12 +17,9 @@ interface EventData {
 
 /**
  * Home page component
- * Displays featured events with caching
+ * Displays featured events
  */
 export default async function Page() {
-  'use cache';
-  cacheLife('hours');
-
   let events: EventData[] = [];
 
   try {
