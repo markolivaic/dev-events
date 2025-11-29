@@ -5,7 +5,7 @@ import EventDetails from '@/components/EventDetails';
  * Event details page
  * Displays full event information with booking form
  */
-const EventDetailsPage = async ({ params }: { params: Promise<{ slug: string }> }) => {
+export default async function EventDetailsPage({ params }: { params: Promise<{ slug: string }> }) {
     const slug = params.then(params => params.slug);
    return (
     <main>

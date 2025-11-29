@@ -1,4 +1,3 @@
-import React from 'react'
 import { notFound } from 'next/navigation';
 import { getSimilarEventsBySlug, getBookingsCountBySlug } from '@/lib/actions/event.actions';
 import { cacheLife } from 'next/cache';
