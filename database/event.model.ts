@@ -250,8 +250,7 @@ eventSchema.pre('save', async function () {
   }
 });
 
-// Create unique index on slug for faster lookups
-eventSchema.index({ slug: 1 }, { unique: true });
+// Note: unique index on slug is automatically created by `unique: true` in schema definition
 
 /**
  * Event model
