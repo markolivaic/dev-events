@@ -1,5 +1,7 @@
 import ExploreBtn from '@/components/ExploreBtn';
 import EventCard from '@/components/EventCard';
+import events from '@/lib/constants';
+import { cacheLife } from 'next/cache';
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
 
@@ -17,7 +19,10 @@ interface EventData {
  * Displays featured events
  */
 export default async function Page() {
-  let events: EventData[] = [];
+  'use cache';
+  cacheLife('hours');
+  
+  /*let events: EventData[] = [];
 
   try {
     const response = await fetch(`${BASE_URL}/api/events`);
@@ -30,7 +35,7 @@ export default async function Page() {
     if (process.env.NODE_ENV === 'development') {
       console.error('Error fetching events:', error);
     }
-  }
+  }*/
 
   return (
     <section>
