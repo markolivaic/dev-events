@@ -6,6 +6,9 @@ import { getSimilarEventsBySlug, getBookingsCountBySlug } from '@/lib/actions/ev
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
 
+// Force dynamic rendering for this page (fetches fresh data on each request)
+export const dynamic = 'force-dynamic';
+
 interface EventDetailItemProps {
   icon: string;
   alt: string;
