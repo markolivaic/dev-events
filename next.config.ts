@@ -1,10 +1,9 @@
 import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
-  /* config options here */
-  cacheComponents: true,
-  typescript: {
-    ignoreBuildErrors: true,
+  experimental: {
+    // @ts-expect-error - dynamicIO is available in Next.js 16 but not yet in types
+    dynamicIO: true,
   },
   images: {
     remotePatterns: [
