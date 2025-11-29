@@ -15,30 +15,44 @@ type EventData = {
 };
 
 const Page = async () => {
-  const response = await fetch(`${BASE_URL}/api/events`);
-  const { events } = await response.json();
+  let events: EventData[] = [];
+
+  try {
+    const response = await fetch(`${BASE_URL}/api/events`);
+
+    if (!response.ok) {
+      console.error('Failed to fetch events:', response.status);
+    } else {
+      const data = await response.json();
+      events = data.events || [];
+    }
+  } catch (error) {
+    console.error('Error fetching events:', error);
+  }
 
   return (
     <section>
-      <h1 className="text-center">The Hub for Every Dev <br /> Event You Can&apost Miss</h1>
+      <h1 className="text-center">The Hub for Every Dev <br /> Event You Can&apos;t Miss</h1>
       <p className="text-center mt-5">Hackathons, Workshops, and More - All in One Place</p>
 
-        <ExploreBtn />
+      <ExploreBtn />
 
-        <div className="mt-20 space-y-7">
-          <h3>Featured Events</h3>
+      <div className="mt-20 space-y-7">
+        <h3>Featured Events</h3>
+        {events.length > 0 ? (
           <ul className="events">
-            {events && events.length > 0 && events.map((event: EventData) => (
+            {events.map((event: EventData) => (
               <li key={event.slug}>
                 <EventCard {...event} />
               </li>
             ))}
           </ul>
-        </div>
-
+        ) : (
+          <p className="text-center mt-5">Unable to load events. Please try again later.</p>
+        )}
+      </div>
     </section>
-  
-  )
+  );
 }
 
 export default Page

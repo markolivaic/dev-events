@@ -32,48 +32,81 @@ const EventTags = ({tags}: {tags: string[]}) => (
 
 const EventDetailsPage = async ({params}: {params: Promise<{slug: string}>}) => {
     const {slug} = await params;
-    const response = await fetch(`${BASE_URL}/api/events/${slug}`);
-    const { event: {description, image, overview, date, time, location, mode, audience, agenda, organizer, tags} } = await response.json();
+    
+    let event: {
+        description?: string;
+        image?: string;
+        overview?: string;
+        date?: string;
+        time?: string;
+        location?: string;
+        mode?: string;
+        audience?: string;
+        agenda?: string[];
+        organizer?: string;
+        tags?: string[];
+    } | null = null;
 
-    if(!description) return notFound();
+    try {
+        const response = await fetch(`${BASE_URL}/api/events/${slug}`);
 
-  return (
-    <section id="event">
-        <div className="header">
-            <h1>Event Description</h1>
-            <p>{description}</p>
-        </div>
-        <div className="details">
-            <div className="content">
-                <Image src={image} alt="Event Banner" width={410} height={300} className="banner" />
+        if (!response.ok) {
+            if (response.status === 404) {
+                return notFound();
+            }
+            throw new Error(`API returned ${response.status}`);
+        }
 
-                <section className="flex-col-gap-2">
-                    <h2>Overview</h2>
-                    <p>{overview}</p>
-                </section>
-                <section className="flex-col-gap-2">
-                    <h2>Event Details</h2>
-                    <EventDetailItem icon="/icons/calendar.svg" alt="calendar" label={date} />
-                    <EventDetailItem icon="/icons/clock.svg" alt="time" label={time} />
-                    <EventDetailItem icon="/icons/pin.svg" alt="pin" label={location} />
-                    <EventDetailItem icon="/icons/mode.svg" alt="mode" label={mode} />
-                    <EventDetailItem icon="/icons/audience.svg" alt="audience" label={audience} />
-                </section>
-                
-                <EventAgenda agendaItems={JSON.parse(agenda[0])} />
+        const data = await response.json();
+        event = data.event;
+        
+        if (!event || !event.description) {
+            return notFound();
+        }
+    } catch (error) {
+        console.error('Error fetching event:', error);
+        return notFound();
+    }
 
-                <section className="flex-col-gap-2">
-                    <h2>About the Organizer</h2>
-                    <p>{organizer}</p>
-                </section>
-                <EventTags tags={JSON.parse(tags[0])} />
+    const {description, image, overview, date, time, location, mode, audience, agenda, organizer, tags} = event;
+
+    return (
+        <section id="event">
+            <div className="header">
+                <h1>Event Description</h1>
+                <p>{description}</p>
             </div>
-            <aside className="booking">
-                <p className="text-lg font-semibold">Book Evenet</p>
-            </aside>
-        </div>
-    </section>
-  )
+            <div className="details">
+                <div className="content">
+                    <Image src={image!} alt="Event Banner" width={410} height={300} className="banner" />
+
+                    <section className="flex-col-gap-2">
+                        <h2>Overview</h2>
+                        <p>{overview}</p>
+                    </section>
+                    <section className="flex-col-gap-2">
+                        <h2>Event Details</h2>
+                        <EventDetailItem icon="/icons/calendar.svg" alt="calendar" label={date!} />
+                        <EventDetailItem icon="/icons/clock.svg" alt="time" label={time!} />
+                        <EventDetailItem icon="/icons/pin.svg" alt="pin" label={location!} />
+                        <EventDetailItem icon="/icons/mode.svg" alt="mode" label={mode!} />
+                        <EventDetailItem icon="/icons/audience.svg" alt="audience" label={audience!} />
+                    </section>
+                    
+                    <EventAgenda agendaItems={JSON.parse(agenda![0])} />
+
+                    <section className="flex-col-gap-2">
+                        <h2>About the Organizer</h2>
+                        <p>{organizer}</p>
+                    </section>
+                    <EventTags tags={JSON.parse(tags![0])} />
+                </div>
+                <aside className="booking">
+                    <p className="text-lg font-semibold">Book Event</p>
+                </aside>
+            </div>
+        </section>
+    );
 }
 
 export default EventDetailsPage

@@ -8,13 +8,23 @@ export async function POST(req: NextRequest) {
         await connectDB();
         const formData = await req.formData();
 
-        let event;
+        // Handle array fields separately (agenda, tags)
+        const event: Record<string, unknown> = {};
+        const arrayFields = ['agenda', 'tags'];
 
         try {
-            event = Object.fromEntries(formData.entries());
+            for (const [key, value] of formData.entries()) {
+                if (arrayFields.includes(key)) {
+                    // Get all values for array fields
+                    event[key] = formData.getAll(key);
+                } else if (key !== 'image') {
+                    // Skip image field, it's handled separately
+                    event[key] = value;
+                }
+            }
         } catch (e) {
             return NextResponse.json(
-                { message: "Invalid JSON data format"},
+                { message: "Invalid form data format"},
                 { status: 400 }
             );
         }
@@ -61,17 +71,49 @@ export async function POST(req: NextRequest) {
 }
 
 
-export async function GET() {
+export async function GET(req: NextRequest) {
     try {
         await connectDB();
-        const events = await Event.find().sort({ createdAt: -1 });
+        
+        // Extract pagination parameters
+        const { searchParams } = new URL(req.url);
+        const page = parseInt(searchParams.get('page') || '1', 10);
+        const limit = parseInt(searchParams.get('limit') || '10', 10);
+        const skip = (page - 1) * limit;
+
+        // Validate pagination parameters
+        if (page < 1 || limit < 1 || limit > 100) {
+            return NextResponse.json(
+                { message: "Invalid pagination parameters" },
+                { status: 400 }
+            );
+        }
+
+        // Fetch events with pagination and total count
+        const [events, total] = await Promise.all([
+            Event.find().sort({ createdAt: -1 }).skip(skip).limit(limit).lean(),
+            Event.countDocuments()
+        ]);
+
         return NextResponse.json(
-            { message: "Events fetched successfully", events },
+            { 
+                message: "Events fetched successfully", 
+                events,
+                pagination: {
+                    page,
+                    limit,
+                    total,
+                    totalPages: Math.ceil(total / limit)
+                }
+            },
             { status: 200 }
         );
     } catch (e) {
+        if (process.env.NODE_ENV === 'development') {
+            console.error('Error fetching events:', e);
+        }
         return NextResponse.json(
-            { message: "Event fetching failed", error: e},
+            { message: "Event fetching failed", error: e instanceof Error ? e.message : "Unknown error" },
             { status: 500 }
         );
     }
