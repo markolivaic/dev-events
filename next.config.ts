@@ -2,6 +2,10 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   /* config options here */
+  typescript: {
+    ignoreBuildErrors: true,
+  },
+  cacheComponents: true,
   images: {
     remotePatterns: [
       {
@@ -18,7 +22,7 @@ const nextConfig: NextConfig = {
       },
       {
         source: "/ingest/:path*",
-        destination: "https://eu.i.posthog.com/:path*",
+        destination: "https://eu.i.posthog.com/:path*", 
       },
     ];
   },

@@ -1,6 +1,7 @@
 import React from 'react'
 import ExploreBtn from '@/components/ExploreBtn'
 import EventCard from '@/components/EventCard'
+import { cacheLife } from 'next/cache';
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
 
@@ -15,6 +16,8 @@ type EventData = {
 };
 
 const Page = async () => {
+  'use cache';
+  cacheLife('hours');
   let events: EventData[] = [];
 
   try {

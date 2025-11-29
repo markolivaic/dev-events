@@ -34,6 +34,9 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ message: "Image is required"}, { status: 400 });
         }
 
+        const tags = JSON.parse(formData.get("tags") as string);
+        const agenda = JSON.parse(formData.get("agenda") as string);
+
         const arrayBuffer = await file.arrayBuffer();
         const buffer = Buffer.from(arrayBuffer);
 
@@ -55,7 +58,11 @@ export async function POST(req: NextRequest) {
         // Ensure slug is not set so pre-save hook generates it
         delete (event as { slug?: string }).slug;
 
-        const createdEvent = await Event.create(event);
+        const createdEvent = await Event.create({
+            ...event,
+            tags: tags,
+            agenda: agenda
+        });
 
         return NextResponse.json(
             { message: "Event created successfully", event: createdEvent },

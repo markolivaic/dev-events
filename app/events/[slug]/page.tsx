@@ -1,6 +1,11 @@
 import React from 'react';
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
+import BookEvent from '@/components/BookEvent';
+import { IEvent } from '@/database/event.model';
+import EventCard from '@/components/EventCard';
+import { getSimilarEventsBySlug } from '@/lib/actions/event.actions';
+import { cacheLife } from 'next/cache';
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
 
@@ -31,9 +36,12 @@ const EventTags = ({tags}: {tags: string[]}) => (
 )
 
 const EventDetailsPage = async ({params}: {params: Promise<{slug: string}>}) => {
+    "use cache";
+    cacheLife('hours');
     const {slug} = await params;
     
     let event: {
+        _id?: string;
         description?: string;
         image?: string;
         overview?: string;
@@ -70,6 +78,10 @@ const EventDetailsPage = async ({params}: {params: Promise<{slug: string}>}) => 
 
     const {description, image, overview, date, time, location, mode, audience, agenda, organizer, tags} = event;
 
+    const bookings = 10;
+
+    const similarEvents = await getSimilarEventsBySlug(slug);
+
     return (
         <section id="event">
             <div className="header">
@@ -93,17 +105,33 @@ const EventDetailsPage = async ({params}: {params: Promise<{slug: string}>}) => 
                         <EventDetailItem icon="/icons/audience.svg" alt="audience" label={audience!} />
                     </section>
                     
-                    <EventAgenda agendaItems={JSON.parse(agenda![0])} />
+                    <EventAgenda agendaItems={agenda || []} />
 
                     <section className="flex-col-gap-2">
                         <h2>About the Organizer</h2>
                         <p>{organizer}</p>
                     </section>
-                    <EventTags tags={JSON.parse(tags![0])} />
+                    <EventTags tags={tags || []} />
                 </div>
                 <aside className="booking">
-                    <p className="text-lg font-semibold">Book Event</p>
+                    <div className="signup-card">
+                        <h2>Book Your Spot</h2>
+                        {bookings > 0 ? (
+                            <p className="text-sm">Join {bookings} people who have already booked their spot!</p>
+                        ): (
+                            <p className="text-sm">No spots left. Be the first to book your spot!</p>
+                        )}
+                        <BookEvent eventId={event._id!} slug={slug} />
+                    </div>
                 </aside>
+            </div>
+            <div className="flex w-full flex-col gap-4 pt-20">
+                <h2>Similar Events</h2>
+                <div className="events">
+                    {similarEvents.length > 0 && similarEvents.map((similarEvent: IEvent) =>(
+                        <EventCard key={similarEvent.title} {...similarEvent} />
+                    ))}
+                </div>
             </div>
         </section>
     );
