@@ -1,7 +1,8 @@
 import ExploreBtn from '@/components/ExploreBtn';
 import EventCard from '@/components/EventCard';
-import connectDB from '@/lib/mongodb';
-import { Event } from '@/database/event.model';
+import { cacheLife } from 'next/cache';
+
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
 
 interface EventData {
   title: string;
@@ -17,17 +18,18 @@ interface EventData {
  * Displays featured events
  */
 export default async function Page() {
+  'use cache';
+  cacheLife('hours');
+  
   let events: EventData[] = [];
 
   try {
-    await connectDB();
-    // Fetch latest 9 events directly from DB
-    events = await Event.find()
-      .sort({ createdAt: -1 })
-      .limit(9)
-      .select('title slug image location date time')
-      .lean();
-      
+    const response = await fetch(`${BASE_URL}/api/events`);
+
+    if (response.ok) {
+      const data = await response.json();
+      events = data.events || [];
+    }
   } catch (error) {
     if (process.env.NODE_ENV === 'development') {
       console.error('Error fetching events:', error);
