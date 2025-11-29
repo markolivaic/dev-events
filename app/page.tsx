@@ -3,9 +3,6 @@ import EventCard from '@/components/EventCard';
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
 
-// Force dynamic rendering (fetches fresh data on each request)
-export const dynamic = 'force-dynamic';
-
 interface EventData {
   title: string;
   slug: string;

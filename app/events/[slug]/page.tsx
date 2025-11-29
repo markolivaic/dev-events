@@ -4,9 +4,6 @@ import BookEvent from '@/components/BookEvent';
 import EventCard from '@/components/EventCard';
 import { getSimilarEventsBySlug, getBookingsCountBySlug } from '@/lib/actions/event.actions';
 
-// Force dynamic rendering for this page (fetches fresh data on each request)
-export const dynamic = 'force-dynamic';
-
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
 
 interface EventDetailItemProps {
