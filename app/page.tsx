@@ -1,58 +1,68 @@
-import React from 'react'
-import ExploreBtn from '@/components/ExploreBtn'
-import EventCard from '@/components/EventCard'
+import { cacheLife } from 'next/cache';
+import ExploreBtn from '@/components/ExploreBtn';
+import EventCard from '@/components/EventCard';
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
 
-type EventData = {
+interface EventData {
   title: string;
   slug: string;
   image: string;
   location: string;
   date: string;
   time: string;
-  [key: string]: unknown;
-};
+}
 
-const Page = async () => {
+/**
+ * Home page component
+ * Displays featured events with caching
+ */
+export default async function Page() {
+  'use cache';
+  cacheLife('hours');
+
   let events: EventData[] = [];
 
   try {
     const response = await fetch(`${BASE_URL}/api/events`);
 
-    if (!response.ok) {
-      console.error('Failed to fetch events:', response.status);
-    } else {
+    if (response.ok) {
       const data = await response.json();
       events = data.events || [];
     }
   } catch (error) {
-    console.error('Error fetching events:', error);
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Error fetching events:', error);
+    }
   }
 
   return (
     <section>
-      <h1 className="text-center">The Hub for Every Dev <br /> Event You Can&apos;t Miss</h1>
-      <p className="text-center mt-5">Hackathons, Workshops, and More - All in One Place</p>
+      <h1 className="text-center">
+        The Hub for Every Dev <br /> Event You Can&apos;t Miss
+      </h1>
+      <p className="text-center mt-5">
+        Hackathons, Workshops, and More - All in One Place
+      </p>
 
       <ExploreBtn />
 
-      <div className="mt-20 space-y-7">
+      <div id="events" className="mt-20 space-y-7">
         <h3>Featured Events</h3>
         {events.length > 0 ? (
           <ul className="events">
-            {events.map((event: EventData) => (
+            {events.map((event) => (
               <li key={event.slug}>
                 <EventCard {...event} />
               </li>
             ))}
           </ul>
         ) : (
-          <p className="text-center mt-5">Unable to load events. Please try again later.</p>
+          <p className="text-center mt-5">
+            No events available at the moment. Check back later!
+          </p>
         )}
       </div>
     </section>
   );
 }
-
-export default Page
