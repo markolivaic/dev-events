@@ -1,5 +1,9 @@
 import posthog from "posthog-js"
 
+if (!process.env.NEXT_PUBLIC_POSTHOG_KEY) {
+  throw new Error('NEXT_PUBLIC_POSTHOG_KEY environment variable is required for PostHog initialization');
+}
+
 posthog.init(process.env.NEXT_PUBLIC_POSTHOG_KEY!, {
   api_host: "/ingest",
   ui_host: "https://eu.posthog.com",

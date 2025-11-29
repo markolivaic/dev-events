@@ -124,24 +124,41 @@ const eventSchema = new Schema<IEvent>(
 /**
  * Generate URL-friendly slug from title
  * Converts to lowercase, replaces spaces with hyphens, removes special characters
+ * Falls back to timestamp-based identifier if slug becomes empty
  */
 function generateSlug(title: string): string {
-  return title
+  const slug = title
     .toLowerCase()
     .trim()
     .replace(/[^\w\s-]/g, '') // Remove special characters
     .replace(/\s+/g, '-') // Replace spaces with hyphens
     .replace(/-+/g, '-') // Replace multiple hyphens with single hyphen
     .replace(/^-+|-+$/g, ''); // Remove leading/trailing hyphens
+
+  // Fallback to timestamp-based identifier if slug is empty
+  // This handles edge cases where title contains only special characters
+  if (!slug) {
+    return `event-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+  }
+
+  return slug;
 }
 
 /**
  * Normalize date to ISO format (YYYY-MM-DD)
  * Handles various input formats and converts to standard ISO date string
+ * Parses YYYY-MM-DD as UTC to avoid timezone shifting
  */
 function normalizeDate(dateInput: string): string {
   try {
-    const date = new Date(dateInput);
+    // Parse as UTC to avoid timezone shifting
+    // Append T00:00:00Z to ensure UTC parsing for YYYY-MM-DD format
+    const isoDateRegex = /^\d{4}-\d{2}-\d{2}$/;
+    const dateString = isoDateRegex.test(dateInput.trim())
+      ? `${dateInput.trim()}T00:00:00Z`
+      : dateInput;
+
+    const date = new Date(dateString);
     if (isNaN(date.getTime())) {
       throw new Error('Invalid date format');
     }
