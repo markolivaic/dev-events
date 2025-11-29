@@ -208,15 +208,15 @@ function normalizeTime(timeInput: string): string {
 eventSchema.pre('save', async function () {
   // Generate slug only if title changed or slug doesn't exist
   if (this.isModified('title') || !this.slug) {
-    let baseSlug = generateSlug(this.title);
+    const baseSlug = generateSlug(this.title);
     let slug = baseSlug;
     let counter = 1;
 
     // Check if slug exists and append counter if needed
     // For new documents, check all; for existing, exclude current
-    const query: { slug: string; _id?: { $ne: any } } = { slug };
+    const query: { slug: string; _id?: { $ne: mongoose.Types.ObjectId } } = { slug };
     if (!this.isNew && this._id) {
-      query._id = { $ne: this._id };
+      query._id = { $ne: this._id as mongoose.Types.ObjectId };
     }
 
     // Check if slug exists
@@ -226,9 +226,9 @@ eventSchema.pre('save', async function () {
       // Slug exists, try with counter suffix
       while (true) {
         slug = `${baseSlug}-${counter}`;
-        const duplicateQuery: { slug: string; _id?: { $ne: any } } = { slug };
+        const duplicateQuery: { slug: string; _id?: { $ne: mongoose.Types.ObjectId } } = { slug };
         if (!this.isNew && this._id) {
-          duplicateQuery._id = { $ne: this._id };
+          duplicateQuery._id = { $ne: this._id as mongoose.Types.ObjectId };
         }
         const duplicate = await Event.findOne(duplicateQuery);
         if (!duplicate) break;
