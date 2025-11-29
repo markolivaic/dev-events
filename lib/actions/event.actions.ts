@@ -2,6 +2,7 @@
 
 import connectDB from '../mongodb';
 import { Event, IEvent } from '@/database/event.model';
+import { Booking } from '@/database/booking.model';
 
 /**
  * Fetches events with similar tags to the given event
@@ -31,5 +32,22 @@ export const getSimilarEventsBySlug = async (slug: string): Promise<IEvent[]> =>
       console.error('Error fetching similar events:', e);
     }
     return [];
+  }
+};
+
+/**
+ * Gets the count of bookings for an event by slug
+ * @param slug - The event slug
+ * @returns Number of bookings
+ */
+export const getBookingsCountBySlug = async (slug: string): Promise<number> => {
+  try {
+    await connectDB();
+    return await Booking.countDocuments({ slug });
+  } catch (e) {
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Error fetching bookings count:', e);
+    }
+    return 0;
   }
 };
