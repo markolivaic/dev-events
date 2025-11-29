@@ -2,7 +2,8 @@ import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
   experimental: {
-    // @ts-expect-error - dynamicIO is available in Next.js 16 but not yet in types
+    cacheComponents: true,
+    // @ts-expect-error - experimental features not yet in types
     dynamicIO: true,
   },
   images: {
