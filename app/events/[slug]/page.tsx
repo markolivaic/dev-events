@@ -1,10 +1,8 @@
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
-import { cacheLife } from 'next/cache';
 import BookEvent from '@/components/BookEvent';
 import EventCard from '@/components/EventCard';
-import { getSimilarEventsBySlug } from '@/lib/actions/event.actions';
-import { Booking } from '@/database/booking.model';
+import { getSimilarEventsBySlug, getBookingsCountBySlug } from '@/lib/actions/event.actions';
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
 
@@ -68,9 +66,6 @@ const EventTags = ({ tags }: { tags: string[] }) => (
  * Displays full event information with booking form
  */
 export default async function EventDetailsPage({ params }: PageProps) {
-  'use cache';
-  cacheLife('hours');
-
   const { slug } = await params;
 
   let event: EventData | null = null;
@@ -99,7 +94,6 @@ export default async function EventDetailsPage({ params }: PageProps) {
   }
 
   const {
-    _id,
     description,
     image,
     overview,
@@ -113,7 +107,7 @@ export default async function EventDetailsPage({ params }: PageProps) {
     tags,
   } = event;
 
-  const bookingsCount = await Booking.countDocuments({ slug });
+  const bookingsCount = await getBookingsCountBySlug(slug);
 
   const similarEvents = await getSimilarEventsBySlug(slug);
 
