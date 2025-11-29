@@ -1,9 +1,17 @@
 import React from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { EventItem } from '@/lib/constants'
 
-const EventCard = ({title, image, slug, location, date, time}: EventItem) => {
+interface EventCardProps {
+  title: string;
+  image: string;
+  slug: string;
+  location: string;
+  date: string;
+  time: string;
+}
+
+const EventCard = ({title, image, slug, location, date, time}: EventCardProps) => {
   return (
     <Link href={`/events/${slug}`} id="event-card">
         <Image src={image} alt={title} width={410} height={300} className="poster" />
