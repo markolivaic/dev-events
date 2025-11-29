@@ -203,11 +203,40 @@ function normalizeTime(timeInput: string): string {
 /**
  * Pre-save hook: Generate slug, normalize date and time
  * Only regenerates slug if title has changed
+ * Handles duplicate slugs by appending counter suffix
  */
-eventSchema.pre('save', function () {
+eventSchema.pre('save', async function () {
   // Generate slug only if title changed or slug doesn't exist
   if (this.isModified('title') || !this.slug) {
-    this.slug = generateSlug(this.title);
+    let baseSlug = generateSlug(this.title);
+    let slug = baseSlug;
+    let counter = 1;
+
+    // Check if slug exists and append counter if needed
+    // For new documents, check all; for existing, exclude current
+    const query: { slug: string; _id?: { $ne: any } } = { slug };
+    if (!this.isNew && this._id) {
+      query._id = { $ne: this._id };
+    }
+
+    // Check if slug exists
+    const existingEvent = await Event.findOne(query);
+
+    if (existingEvent) {
+      // Slug exists, try with counter suffix
+      while (true) {
+        slug = `${baseSlug}-${counter}`;
+        const duplicateQuery: { slug: string; _id?: { $ne: any } } = { slug };
+        if (!this.isNew && this._id) {
+          duplicateQuery._id = { $ne: this._id };
+        }
+        const duplicate = await Event.findOne(duplicateQuery);
+        if (!duplicate) break;
+        counter++;
+      }
+    }
+
+    this.slug = slug;
   }
   
   // Normalize date to ISO format
